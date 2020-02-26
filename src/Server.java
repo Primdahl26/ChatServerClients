@@ -230,11 +230,10 @@ public class Server {
         }
 
         // write a String to the Client output stream
-        public boolean writeMsg(String message) {
+        public void writeMsg(String message) {
             // if Client is still connected send the message to it
             if(!socket.isConnected()) {
                 close();
-                return false;
             }
             // write the message to the stream
             try {
@@ -245,7 +244,6 @@ public class Server {
                 display(stars + "Error sending message to " + username + stars);
                 display(e.toString());
             }
-            return true;
         }
     }
 }
