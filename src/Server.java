@@ -28,9 +28,6 @@ public class Server {
         clientList = new ArrayList<>();
     }
 
-    public Server(){
-    }
-
     public void start() {
         keepGoing = true;
         try {
@@ -80,7 +77,7 @@ public class Server {
 
         //Prints out the message for all clients in list
         for (ClientThread clientThread : clientList) {
-            clientThread.writeMsg(messageLf);
+            clientThread.writeMessage(messageLf);
         }
     }
 
@@ -152,15 +149,8 @@ public class Server {
             date = new Date().toString() + "\n";
         }
 
-        public ClientThread(){
-        }
-
         public String getUsername() {
             return username;
-        }
-
-        public void setUsername(String username) {
-            this.username = username;
         }
 
         // infinite loop to read and forward message
@@ -193,11 +183,11 @@ public class Server {
                         keepGoing = false;
                         break;
                     case ChatMessage.LIST:
-                        writeMsg("List of the users connected at " + sdf.format(new Date()) + "\n");
+                        writeMessage("List of the users connected at " + sdf.format(new Date()) + "\n");
                         // send list of active clients
                         for(int i = 0; i < clientList.size(); ++i) {
                             ClientThread clientThread = clientList.get(i);
-                            writeMsg((i+1) + ") " + clientThread.username + " since " + clientThread.date);
+                            writeMessage((i+1) + ") " + clientThread.username + " since " + clientThread.date);
                         }
                         break;
                 }
@@ -230,7 +220,7 @@ public class Server {
         }
 
         // write a String to the Client output stream
-        public void writeMsg(String message) {
+        public void writeMessage(String message) {
             // if Client is still connected send the message to it
             if(!socket.isConnected()) {
                 close();
@@ -241,8 +231,7 @@ public class Server {
             }
             // if an error occurs, do not abort just inform the user
             catch(IOException e) {
-                display(stars + "Error sending message to " + username + stars);
-                display(e.toString());
+                e.printStackTrace();
             }
         }
     }
