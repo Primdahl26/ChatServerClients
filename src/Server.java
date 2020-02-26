@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.Array;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
@@ -27,6 +28,9 @@ public class Server {
         clientList = new ArrayList<>();
     }
 
+    public Server(){
+    }
+
     public void start() {
         keepGoing = true;
         try {
@@ -37,8 +41,9 @@ public class Server {
 
                 ClientThread clientThread = new ClientThread(socket);
 
-                if (!keepGoing)
+                if (!keepGoing) {
                     break;
+                }
                 //Add the client to the Arraylist
                 clientList.add(clientThread);
 
@@ -61,8 +66,8 @@ public class Server {
                 display("Exception closing the server and clients: " + e);
             }
         } catch (IOException e) {
-            String msg = sdf.format(new Date()) + " Exception on new ServerSocket: " + e + "\n";
-            display(msg);
+            String message = sdf.format(new Date()) + " Exception on new ServerSocket: " + e + "\n";
+            display(message);
         }
     }
 
@@ -73,22 +78,16 @@ public class Server {
         // display message
         System.out.print(messageLf);
 
-        // we loop in reverse order in case we would have to remove a Client
-        // because it has disconnected
-        for(int i = clientList.size(); --i >= 0;) {
-            ClientThread clientThread = clientList.get(i);
-            // try to write to the Client if it fails remove it from the list
-            if(!clientThread.writeMsg(messageLf)) {
-                clientList.remove(i);
-                display("Disconnected Client " + clientThread.username + " removed from list.");
-            }
+        //Prints out the message for all clients in list
+        for (ClientThread clientThread : clientList) {
+            clientThread.writeMsg(messageLf);
         }
-        //return true;
     }
 
     public synchronized void remove(int id) {
-        String disconnectedClient = "";
+        String disconnectedClient="";
         // scan the array list until we found the Id
+        //In reverse order
         for (int i = 0; i < clientList.size(); ++i) {
             ClientThread clientThread = clientList.get(i);
             // if found remove it
@@ -101,8 +100,8 @@ public class Server {
         broadcast(stars + disconnectedClient + " has left the chat room." + stars);
     }
 
-    public void display(String msg) {
-        String time = sdf.format(new Date()) + " " + msg;
+    public void display(String message) {
+        String time = sdf.format(new Date()) + " " + message;
         System.out.println(time);
     }
 
@@ -113,7 +112,7 @@ public class Server {
         server.start();
     }
 
-    //Nested class
+    //Inner class
     public class ClientThread extends Thread {
         // the socket to get messages from client
         Socket socket;
@@ -121,6 +120,7 @@ public class Server {
         ObjectOutputStream sOutput;
         // my unique id (easier for deconnection)
         int id;
+
         // the Username of the Client
         String username;
         // message object to recieve message and its type
@@ -139,6 +139,7 @@ public class Server {
                 sInput  = new ObjectInputStream(socket.getInputStream());
                 // read the username
                 username = (String) sInput.readObject();
+
                 broadcast(stars + username + " has joined the chat room." + stars);
             }
             catch (IOException e) {
@@ -151,8 +152,15 @@ public class Server {
             date = new Date().toString() + "\n";
         }
 
+        public ClientThread(){
+        }
+
         public String getUsername() {
             return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
         }
 
         // infinite loop to read and forward message
@@ -222,7 +230,7 @@ public class Server {
         }
 
         // write a String to the Client output stream
-        public boolean writeMsg(String msg) {
+        public boolean writeMsg(String message) {
             // if Client is still connected send the message to it
             if(!socket.isConnected()) {
                 close();
@@ -230,7 +238,7 @@ public class Server {
             }
             // write the message to the stream
             try {
-                sOutput.writeObject(msg);
+                sOutput.writeObject(message);
             }
             // if an error occurs, do not abort just inform the user
             catch(IOException e) {

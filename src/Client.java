@@ -10,7 +10,6 @@ import java.util.Scanner;
 public class Client {
 
     private String stars = " *** ";
-
     // for I/O
     // to read from the socket
     private ObjectInputStream sInput;
@@ -39,8 +38,8 @@ public class Client {
             return false;
         }
 
-        String msg = "Connection accepted " + socket.getInetAddress() + ":" + socket.getPort();
-        display(msg);
+        String message = "Connection accepted " + socket.getInetAddress() + ":" + socket.getPort();
+        display(message);
 
         // Creating both Data Stream
         try {
@@ -68,13 +67,13 @@ public class Client {
         return true;
     }
 
-    public void display(String msg) {
-        System.out.println(msg);
+    public void display(String message) {
+        System.out.println(message);
     }
 
-    public void sendMessage(ChatMessage msg) {
+    public void sendMessage(ChatMessage message) {
         try {
-            sOutput.writeObject(msg);
+            sOutput.writeObject(message);
         }
         catch(IOException e) {
             display("Exception writing to server: " + e);
@@ -114,33 +113,35 @@ public class Client {
 
         // create the Client object
         Client client = new Client(serverAddress, portNumber, userName);
-        // try to connect to the server and return if not connected
-        if(!client.start())
-            return;
 
-        System.out.println("\nHello "+userName+"! Welcome to the chatroom.");
+        // try to connect to the server and return if not connected
+        if(!client.start()) {
+            return;
+        }
+
+        System.out.println("\nHello "+userName+"! Welcome to the chatroom.\n");
         System.out.println("Instructions:");
         System.out.println("1. Simply type the message to send broadcast to all active clients");
         System.out.println("2. Type LIST to see list of active clients");
-        System.out.println("3. Type QUIT to disconnect from server");
+        System.out.println("3. Type QUIT to disconnect from server\n");
 
         // infinite loop to get the input from the user
         while(true) {
             System.out.print("> ");
             // read message from user
-            String msg = scan.nextLine();
+            String message = scan.nextLine();
             // logout if message is LOGOUT
-            if(msg.equalsIgnoreCase("QUIT")) {
+            if(message.equalsIgnoreCase("QUIT")) {
                 client.sendMessage(new ChatMessage(ChatMessage.QUIT, ""));
                 break;
             }
             // message to check who are present in chatroom
-            else if(msg.equalsIgnoreCase("LIST")) {
+            else if(message.equalsIgnoreCase("LIST")) {
                 client.sendMessage(new ChatMessage(ChatMessage.LIST, ""));
             }
             // regular text message
             else {
-                client.sendMessage(new ChatMessage(ChatMessage.MESSAGE, msg));
+                client.sendMessage(new ChatMessage(ChatMessage.MESSAGE, message));
             }
         }
         // close resource
@@ -149,16 +150,16 @@ public class Client {
         client.disconnect();
     }
 
-    //Nested class
+    //Inner class
     class ListenFromServer extends Thread {
 
         public void run() {
             while(true) {
                 try {
                     // read the message form the input datastream
-                    String msg = (String) sInput.readObject();
+                    String message = (String) sInput.readObject();
                     // print the message
-                    System.out.println(msg);
+                    System.out.println(message);
                     System.out.print("> ");
                 }
                 catch(IOException e) {
