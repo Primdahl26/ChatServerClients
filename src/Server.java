@@ -155,7 +155,7 @@ public class Server {
 
         // infinite loop to read and forward message
         public void run() {
-            // to loop until LOGOUT
+            // to loop until QUIT
             boolean keepGoing = true;
             while(keepGoing) {
                 // read a String (which is an object)

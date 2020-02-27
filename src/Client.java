@@ -10,14 +10,9 @@ import java.util.Scanner;
 public class Client {
 
     private String stars = " *** ";
-    // for I/O
-    // to read from the socket
     private ObjectInputStream sInput;
-    // to write on the socket
     private ObjectOutputStream sOutput;
-
     private Socket socket;
-
     private String server, username;
     private int port;
 
@@ -80,6 +75,7 @@ public class Client {
         }
     }
 
+    //Method to close all connections
     public void disconnect() {
         try {
             if(sInput != null) sInput.close();
@@ -130,13 +126,13 @@ public class Client {
             System.out.print("> ");
             // read message from user
             String message = scan.nextLine();
-            // logout if message is LOGOUT
-            if(message.equalsIgnoreCase("QUIT")) {
+            // Quit of message is quit
+            if(message.equals("QUIT")) {
                 client.sendMessage(new ChatMessage(ChatMessage.QUIT, ""));
                 break;
             }
             // message to check who are present in chatroom
-            else if(message.equalsIgnoreCase("LIST")) {
+            else if(message.equals("LIST")) {
                 client.sendMessage(new ChatMessage(ChatMessage.LIST, ""));
             }
             // regular text message
@@ -144,9 +140,8 @@ public class Client {
                 client.sendMessage(new ChatMessage(ChatMessage.MESSAGE, message));
             }
         }
-        // close resource
+        //When out of the while loop (QUIT is typed)
         scan.close();
-        // client completed its job. disconnect client.
         client.disconnect();
     }
 
