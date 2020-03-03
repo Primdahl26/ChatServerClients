@@ -28,45 +28,46 @@ public class Client {
             socket = new Socket(server, port);
         }
         // exception handler if it failed
-        catch(Exception ec) {
-            display("Error connectiong to server:" + ec);
+        catch(Exception e) {
+            display("Error connectiong to server:" + e);
             return false;
         }
 
         String message = "Connection accepted " + socket.getInetAddress() + ":" + socket.getPort();
         display(message);
 
-        // Creating both Data Stream
+        //Creating both Data Stream
         try {
             sInput  = new ObjectInputStream(socket.getInputStream());
             sOutput = new ObjectOutputStream(socket.getOutputStream());
         }
-        catch (IOException eIO) {
-            display("Exception creating new Input/output Streams: " + eIO);
+        catch (IOException IOe) {
+            display("Exception creating new Input/output Streams: " + IOe);
             return false;
         }
 
-        // creates the Thread to listen from the server
+        //creates the Thread to listen from the server
         new ListenFromServer().start();
-        // Send our username to the server this is the only message that we
-        // will send as a String. All other messages will be ChatMessage objects
+
+        //Send our username to the server this is the only message that we
+        //Will send as a String. All other messages will be ChatMessage objects
         try {
             sOutput.writeObject(username);
         }
-        catch (IOException eIO) {
-            display("Exception doing login : " + eIO);
+        catch (IOException IOe) {
+            display("Exception doing login : " + IOe);
             disconnect();
             return false;
         }
         // success we inform the caller that it worked
-        return true;
+        return false;
     }
 
     public void display(String message) {
         System.out.println(message);
     }
 
-    public void sendMessage(ChatMessage message) {
+        public void sendMessage(ChatMessage message) {
         try {
             sOutput.writeObject(message);
         }
@@ -97,6 +98,7 @@ public class Client {
         }
     }
 
+    //TODO: Find a way to set this in a loop
     public static void main(String[] args) {
         // default values if not entered
         int portNumber = 1337;
@@ -111,9 +113,8 @@ public class Client {
         Client client = new Client(serverAddress, portNumber, userName);
 
         // try to connect to the server and return if not connected
-        if(!client.start()) {
+        if(!client.start())
             return;
-        }
 
         System.out.println("\nHello "+userName+"! Welcome to the chatroom.\n");
         System.out.println("Instructions:");
@@ -129,6 +130,7 @@ public class Client {
             // Quit of message is quit
             if(message.equals("QUIT")) {
                 client.sendMessage(new ChatMessage(ChatMessage.QUIT, ""));
+                //Break the loop
                 break;
             }
             // message to check who are present in chatroom

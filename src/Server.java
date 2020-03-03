@@ -1,3 +1,5 @@
+import javax.management.remote.rmi.RMIConnection;
+import javax.management.remote.rmi.RMIConnectorServer;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -45,6 +47,8 @@ public class Server {
                 clientList.add(clientThread);
 
                 clientThread.start();
+
+
             }
             try {
                 serverSocket.close();
@@ -133,18 +137,19 @@ public class Server {
             //Thread trying to create Object Input/Output Streams
             try {
                 sOutput = new ObjectOutputStream(socket.getOutputStream());
-                sInput  = new ObjectInputStream(socket.getInputStream());
+                sInput = new ObjectInputStream(socket.getInputStream());
                 // read the username
                 username = (String) sInput.readObject();
 
                 broadcast(stars + username + " has joined the chat room." + stars);
+                showClientList();
             }
-            catch (IOException e) {
-                display("Exception creating new Input/output Streams: " + e);
+            catch (IOException IOe) {
+                display("Exception creating new Input/output Streams: " + IOe);
                 return;
             }
-            catch (ClassNotFoundException e) {
-                e.printStackTrace();
+            catch (ClassNotFoundException CNFe) {
+                CNFe.printStackTrace();
             }
             date = new Date().toString() + "\n";
         }
@@ -166,8 +171,8 @@ public class Server {
                     display(username + " Exception reading Streams: " + e);
                     break;
                 }
-                catch(ClassNotFoundException e) {
-                    e.printStackTrace();
+                catch(ClassNotFoundException CNFe) {
+                    CNFe.printStackTrace();
                     break;
                 }
                 // get the message from the ChatMessage object received
@@ -183,12 +188,7 @@ public class Server {
                         keepGoing = false;
                         break;
                     case ChatMessage.LIST:
-                        writeMessage("List of the users connected at " + sdf.format(new Date()) + "\n");
-                        // send list of active clients
-                        for(int i = 0; i < clientList.size(); ++i) {
-                            ClientThread clientThread = clientList.get(i);
-                            writeMessage((i+1) + ") " + clientThread.username + " since " + clientThread.date);
-                        }
+                        showClientList();
                         break;
                 }
             }
@@ -219,6 +219,22 @@ public class Server {
             }
         }
 
+        //Shows a list of active clients
+        public void showClientList(){
+            //Shows the list of users online
+            //But only if there is 1 or more users online
+            if (clientList.size()!=0) {
+                writeMessage("List of the users connected at " + sdf.format(new Date())+":");
+                // send list of active clients
+                for (int i = 0; i < clientList.size(); ++i) {
+                    ClientThread clientThread = clientList.get(i);
+                    writeMessage((i + 1) + ") " + clientThread.username + " since " + clientThread.date);
+                }
+            } else{
+                writeMessage("You are the only one connected at " + sdf.format(new Date())+"\n");
+            }
+        }
+
         // write a String to the Client output stream
         public void writeMessage(String message) {
             // if Client is still connected send the message to it
@@ -230,8 +246,8 @@ public class Server {
                 sOutput.writeObject(message);
             }
             // if an error occurs, do not abort just inform the user
-            catch(IOException e) {
-                e.printStackTrace();
+            catch(IOException IOe) {
+                IOe.printStackTrace();
             }
         }
     }
