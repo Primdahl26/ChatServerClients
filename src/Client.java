@@ -5,11 +5,9 @@ import java.net.Socket;
 import java.util.Scanner;
 
 //TODO: Make 2 users with same name unable to connect
-//TODO: Optional - Add a log feature
 
 public class Client {
 
-    private String stars = " *** ";
     private ObjectInputStream sInput;
     private ObjectOutputStream sOutput;
     private Socket socket;
@@ -40,6 +38,7 @@ public class Client {
         try {
             sInput  = new ObjectInputStream(socket.getInputStream());
             sOutput = new ObjectOutputStream(socket.getOutputStream());
+
         }
         catch (IOException IOe) {
             display("Exception creating new Input/output Streams: " + IOe);
@@ -49,18 +48,17 @@ public class Client {
         //creates the Thread to listen from the server
         new ListenFromServer().start();
 
-        //Send our username to the server this is the only message that we
-        //Will send as a String. All other messages will be ChatMessage objects
+        //Send our username to the server
         try {
             sOutput.writeObject(username);
-        }
-        catch (IOException IOe) {
+
+        } catch (IOException IOe) {
             display("Exception doing login : " + IOe);
             disconnect();
             return false;
         }
-        // success we inform the caller that it worked
-        return false;
+        //Everything succeeded
+        return true;
     }
 
     public void display(String message) {
@@ -113,8 +111,9 @@ public class Client {
         Client client = new Client(serverAddress, portNumber, userName);
 
         // try to connect to the server and return if not connected
-        if(!client.start())
+        if(!client.start()) {
             return;
+        }
 
         System.out.println("\nHello "+userName+"! Welcome to the chatroom.\n");
         System.out.println("Instructions:");
@@ -160,6 +159,7 @@ public class Client {
                     System.out.print("> ");
                 }
                 catch(IOException e) {
+                    String stars = " *** ";
                     display(stars + "Server has closed the connection: " + e + stars);
                     break;
                 }
